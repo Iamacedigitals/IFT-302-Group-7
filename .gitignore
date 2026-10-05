@@ -1,1 +1,19 @@
+# Local config / secrets
+config/config.php
 .env
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Dependencies / logs / uploads
+vendor/
+node_modules/
+*.log
+public/uploads/
+
+# DB dumps with real data
+*.sqlite
+database/backup*.sql
