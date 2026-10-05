@@ -26,8 +26,8 @@ Example: `feat: add current bill API endpoint`
 ## Task Ownership
 | Area | Folders | Owner |
 |---|---|---|
-| Diagrams (use case, activity, ERD) | `docs/diagrams/` | |
-| Database | `database/` | |
+| Diagrams (use case, activity, ERD) | `docs/diagrams/` | Laura, Temiloluwa, Olamide|
+| Database | `database/` | David |
 | OOP classes | `src/` | |
 | API | `api/` | |
 | Frontend pages + CSS | `public/`, `includes/` | |
