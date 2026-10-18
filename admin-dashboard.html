@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Dashboard – GridConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="flash.png">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="gridconnect-sidebar">
+      <div>
+        <div class="sidebar-top"><a class="logo " href="admin-dashboard.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>GridConnect</a></div>
+        <nav class="nav" aria-label="Main">
+        <a href="admin-dashboard.html" class="active" aria-current="page">Dashboard</a>
+        <a href="admin-customers.html">Customers</a>
+        <a href="admin-bills.html">Bills</a>
+        <a href="admin-payments.html">Payments</a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom"><a href="login.html">Logout</a></div>
+    </aside>
+    <div class="sidebar-backdrop" data-menu-close aria-hidden="true"></div>
+
+    <header class="topbar"><button type="button" class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="gridconnect-sidebar"><span></span><span></span><span></span></button><div class="user-chip"><span class="user-avatar" aria-hidden="true">A</span><span class="user-name">Admin</span></div></header>
+
+    <main class="main">
+      <div class="content">
+        <h1>Admin Dashboard</h1>
+
+        <div class="stats">
+          <div class="stat"><p class="field-label">Total Customers</p><p class="stat-value">1,428</p></div>
+          <div class="stat"><p class="field-label">Total Bills</p><p class="stat-value">4,890</p></div>
+          <div class="stat"><p class="field-label">Total Payments Received</p><p class="stat-value">₦84,250,000</p></div>
+          <div class="stat"><p class="field-label">Pending Payments</p><p class="stat-value">₦3,120,500</p></div>
+        </div>
+
+        <section class="card card--flush">
+          <h2 class="card-title">Recent payments</h2>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Transaction ID</th><th>Customer</th><th>Meter Number</th><th class="num">Amount</th><th class="num">Status</th></tr>
+              </thead>
+              <tbody>
+            <tr>
+              <td class="strong">TXN-89421</td><td class="dark">Amina Bello</td><td>45012345678</td>
+              <td class="amount-cell">₦18,450.00</td><td class="num"><span class="badge badge--paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-89420</td><td class="dark">Chukwuma Eze</td><td>45012345679</td>
+              <td class="amount-cell">₦24,700.00</td><td class="num"><span class="badge badge--paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-89419</td><td class="dark">Fatima Yusuf</td><td>45012345680</td>
+              <td class="amount-cell">₦12,300.00</td><td class="num"><span class="badge badge--pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-89418</td><td class="dark">Olumide Adeyemi</td><td>45012345681</td>
+              <td class="amount-cell">₦31,150.00</td><td class="num"><span class="badge badge--paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-89417</td><td class="dark">Zainab Ibrahim</td><td>45012345682</td>
+              <td class="amount-cell">₦15,800.00</td><td class="num"><span class="badge badge--failed">Failed</span></td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

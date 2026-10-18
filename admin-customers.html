@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Customers – GridConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="flash.png">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="gridconnect-sidebar">
+      <div>
+        <div class="sidebar-top"><a class="logo " href="admin-dashboard.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>GridConnect</a></div>
+        <nav class="nav" aria-label="Main">
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="admin-customers.html" class="active" aria-current="page">Customers</a>
+        <a href="admin-bills.html">Bills</a>
+        <a href="admin-payments.html">Payments</a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom"><a href="login.html">Logout</a></div>
+    </aside>
+    <div class="sidebar-backdrop" data-menu-close aria-hidden="true"></div>
+
+    <header class="topbar"><button type="button" class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="gridconnect-sidebar"><span></span><span></span><span></span></button><div class="user-chip"><span class="user-avatar" aria-hidden="true">A</span><span class="user-name">Admin</span></div></header>
+
+    <main class="main">
+      <div class="content">
+        <div class="page-head">
+          <h1>Customers</h1>
+          <p class="subtitle">Directory of registered utility consumers and active telemetry endpoints.</p>
+        </div>
+
+        <form class="search" role="search" action="#" method="get">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" name="q" placeholder="Search customers by name, email, or meter number..." aria-label="Search customers">
+        </form>
+
+        <section class="card card--flush">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Name</th><th>Email</th><th>Phone</th><th>Meter Number</th></tr>
+              </thead>
+              <tbody>
+            <tr>
+              <td class="dark">Amina Bello</td><td>amina.bello@example.ng</td><td>+234 803 123 4567</td><td class="dark strong">45012345678</td>
+            </tr>
+            <tr>
+              <td class="dark">Chukwuma Eze</td><td>c.eze@example.ng</td><td>+234 802 987 6543</td><td class="dark strong">45012345679</td>
+            </tr>
+            <tr>
+              <td class="dark">Fatima Yusuf</td><td>f.yusuf@example.ng</td><td>+234 814 555 0192</td><td class="dark strong">45012345680</td>
+            </tr>
+            <tr>
+              <td class="dark">Olumide Adeyemi</td><td>o.adeyemi@example.ng</td><td>+234 701 234 5678</td><td class="dark strong">45012345681</td>
+            </tr>
+            <tr>
+              <td class="dark">Zainab Ibrahim</td><td>z.ibrahim@example.ng</td><td>+234 809 876 5432</td><td class="dark strong">45012345682</td>
+            </tr>
+            <tr>
+              <td class="dark">Emeka Nwosu</td><td>e.nwosu@example.ng</td><td>+234 818 333 4455</td><td class="dark strong">45012345683</td>
+            </tr>
+            <tr>
+              <td class="dark">Aisha Mohammed</td><td>a.mohammed@example.ng</td><td>+234 805 444 7788</td><td class="dark strong">45012345684</td>
+            </tr>
+            <tr>
+              <td class="dark">Babatunde Adeleke</td><td>b.adeleke@example.ng</td><td>+234 807 111 2233</td><td class="dark strong">45012345685</td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

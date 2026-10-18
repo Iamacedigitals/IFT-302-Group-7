@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log in – GridConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="flash.png">
+</head>
+<body class="auth-page">
+  <div class="center-page auth-layout">
+    <main class="panel panel--login auth-panel">
+      <div class="auth-brand-mobile"><a class="logo logo--auth-brand" href="login.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"></path></svg></span><span>GridConnect</span></a></div>
+      <div class="auth-heading"><h1>Log in</h1><p class="subtitle">Welcome back to GridConnect</p></div>
+
+      <!-- TODO (backend): change action to the real login script, e.g. login.php -->
+      <form id="login-form" action="login.php" method="post">
+        <p id="login-message" class="form-message form-message--error" role="alert" hidden>Invalid email or password.</p>
+
+        <div class="field">
+          <label class="label--caps" for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="amina.bello@example.ng" required>
+        </div>
+
+        <div class="field">
+          <label class="label--caps" for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" minlength="8" required>
+        </div>
+
+        <button type="submit" class="btn btn--block">Log in</button>
+      </form>
+
+      <p class="panel-foot">New customer? <a href="register.html">Register</a></p>
+    </main>
+    <div class="auth-brand-desktop"><a class="logo logo--auth-brand" href="login.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"></path></svg></span><span>GridConnect</span></a></div>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard – GridConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="flash.png">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="gridconnect-sidebar">
+      <div>
+        <div class="sidebar-top"><a class="logo " href="dashboard.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>GridConnect</a></div>
+        <nav class="nav" aria-label="Main">
+        <a href="dashboard.html" class="active" aria-current="page">Dashboard</a>
+        <a href="previous-bills.html">Previous Bills</a>
+        <a href="transactions.html">Transaction History</a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom"><a href="login.html">Logout</a></div>
+    </aside>
+    <div class="sidebar-backdrop" data-menu-close aria-hidden="true"></div>
+
+    <header class="topbar"><button type="button" class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="gridconnect-sidebar"><span></span><span></span><span></span></button><div class="user-chip"><span class="user-avatar" aria-hidden="true">A</span><span class="user-name">Amina Bello</span></div></header>
+
+    <main class="main">
+      <div class="content">
+        <section class="card" aria-labelledby="account-title">
+          <p class="eyebrow" id="account-title" style="color:#b9cdf5">Account profile</p>
+          <div class="field-grid" style="margin-top:16px">
+            <div><p class="field-label">Customer Name</p><p class="field-value field-value--strong" id="customer-name">Amina Bello</p></div>
+            <div><p class="field-label">Email Address</p><p class="field-value" id="customer-email">amina.bello@example.ng</p></div>
+            <div><p class="field-label">Meter Number</p><p class="field-value field-value--mono" id="customer-meter">45012345678</p></div>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="check-title">
+          <h2 id="check-title">Check your bill</h2>
+          <!-- TODO (backend): action/endpoint that returns the bill for a meter number -->
+          <form id="check-bill-form" action="get-bill.php" method="post" novalidate>
+            <div class="form-row">
+              <div class="grow">
+                <label for="meter-number">Meter Number</label>
+                <input type="text" id="meter-number" name="meter_number" placeholder="45012345678" inputmode="numeric" required>
+              </div>
+              <button type="submit" class="btn">Get bill</button>
+            </div>
+            <!-- Shown when the meter number is not found (remove the hidden attribute to preview) -->
+            <p id="meter-error" class="field-error" role="alert" hidden>Meter number not found. Please check and try again.</p>
+          </form>
+        </section>
+
+        <section class="card" id="current-bill" aria-labelledby="bill-title">
+          <h2 id="bill-title" class="sr-only" style="position:absolute;left:-9999px">Current bill</h2>
+          <div class="card-row">
+            <div>
+              <p class="field-label">Billing Period</p>
+              <p class="field-value field-value--strong" id="bill-period">Jun 1 – Jun 30, 2024</p>
+            </div>
+            <span class="badge badge--pending" id="bill-status">Pending</span>
+          </div>
+          <div class="field-grid">
+            <div><p class="field-label">Units Consumed</p><p class="field-value" id="bill-units">325 kWh</p></div>
+            <div><p class="field-label">Due Date</p><p class="field-value" id="bill-due">Jul 15, 2024</p></div>
+            <div><p class="field-label">Amount Due</p><p class="amount" id="bill-amount">₦18,450.00</p></div>
+          </div>
+          <div class="card-actions"><a class="btn" href="make-payment.html">Pay now</a></div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Payment Receipt – GridConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="flash.png">
+</head>
+<body>
+  <div class="center-page">
+    <a class="logo logo--large" href="dashboard.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>GridConnect</a>
+    <main class="panel">
+      <div class="receipt-top">
+        <div>
+          <p class="eyebrow">Transaction confirmation</p>
+          <h1>Payment Receipt</h1>
+        </div>
+        <span class="badge badge--paid-green badge--dot">Paid</span>
+      </div>
+
+      <div class="receipt-amount"><span>Amount Settled</span><strong>₦18,450.00</strong></div>
+
+      <ul class="receipt-list">
+        <li><span>Receipt Number</span><span class="strong">REC-982410-GC</span></li>
+        <li><span>Timestamp</span><span>Jul 10, 2024, 14:32</span></li>
+        <li><span>Account Holder</span><span class="strong" style="letter-spacing:0">Amina Bello</span></li>
+        <li><span>Meter Token / ID</span><span class="strong">45012345678</span></li>
+        <li><span>Billing Period</span><span>Jun 1 – Jun 30, 2024</span></li>
+        <li><span>Payment Method</span><span>Card</span></li>
+      </ul>
+
+      <div class="receipt-actions">
+        <button type="button" class="btn btn--ghost" onclick="window.print()">Print</button>
+        <a class="btn" href="dashboard.html">Back to dashboard</a>
+      </div>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

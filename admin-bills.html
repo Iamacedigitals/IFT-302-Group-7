@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bills – GridConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="flash.png">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="gridconnect-sidebar">
+      <div>
+        <div class="sidebar-top"><a class="logo " href="admin-dashboard.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>GridConnect</a></div>
+        <nav class="nav" aria-label="Main">
+        <a href="admin-dashboard.html">Dashboard</a>
+        <a href="admin-customers.html">Customers</a>
+        <a href="admin-bills.html" class="active" aria-current="page">Bills</a>
+        <a href="admin-payments.html">Payments</a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom"><a href="login.html">Logout</a></div>
+    </aside>
+    <div class="sidebar-backdrop" data-menu-close aria-hidden="true"></div>
+
+    <header class="topbar"><button type="button" class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="gridconnect-sidebar"><span></span><span></span><span></span></button><div class="user-chip"><span class="user-avatar" aria-hidden="true">A</span><span class="user-name">Admin</span></div></header>
+
+    <main class="main">
+      <div class="content">
+        <div class="page-head">
+          <h1>Bills</h1>
+          <p class="subtitle">Manage utility ledger accounts, reconciliation cycles, and bill dispatch statuses.</p>
+        </div>
+
+        <form class="search" role="search" action="#" method="get">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" name="q" placeholder="Search bills by bill ID, customer name, or meter number..." aria-label="Search bills">
+        </form>
+
+        <section class="card card--flush">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Bill ID</th><th>Customer</th><th>Meter Number</th><th>Billing Period</th><th class="num">Amount</th><th class="num">Status</th></tr>
+              </thead>
+              <tbody>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-101</a></td><td class="dark">Amina Bello</td><td>45012345678</td><td>Jun 1 – Jun 30, 2024</td>
+              <td class="amount-cell">₦18,450.00</td><td class="num"><span class="badge badge--pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-102</a></td><td class="dark">Chukwuma Eze</td><td>45012345679</td><td>Jun 1 – Jun 30, 2024</td>
+              <td class="amount-cell">₦24,700.00</td><td class="num"><span class="badge badge--paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-103</a></td><td class="dark">Fatima Yusuf</td><td>45012345680</td><td>May 1 – May 31, 2024</td>
+              <td class="amount-cell">₦12,300.00</td><td class="num"><span class="badge badge--failed">Failed</span></td>
+            </tr>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-104</a></td><td class="dark">Olumide Adeyemi</td><td>45012345681</td><td>Jun 1 – Jun 30, 2024</td>
+              <td class="amount-cell">₦31,150.00</td><td class="num"><span class="badge badge--paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-105</a></td><td class="dark">Zainab Ibrahim</td><td>45012345682</td><td>Jun 1 – Jun 30, 2024</td>
+              <td class="amount-cell">₦15,800.00</td><td class="num"><span class="badge badge--pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-106</a></td><td class="dark">Emeka Nwosu</td><td>45012345683</td><td>May 1 – May 31, 2024</td>
+              <td class="amount-cell">₦22,040.00</td><td class="num"><span class="badge badge--paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-107</a></td><td class="dark">Aisha Mohammed</td><td>45012345684</td><td>Jun 1 – Jun 30, 2024</td>
+              <td class="amount-cell">₦19,600.00</td><td class="num"><span class="badge badge--paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td class="link-cell"><a href="#">BIL-2024-108</a></td><td class="dark">Babatunde Adeleke</td><td>45012345685</td><td>May 1 – May 31, 2024</td>
+              <td class="amount-cell">₦8,750.00</td><td class="num"><span class="badge badge--pending">Pending</span></td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>

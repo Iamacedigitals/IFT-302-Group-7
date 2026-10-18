@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Transaction History – GridConnect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" href="flash.png">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" id="gridconnect-sidebar">
+      <div>
+        <div class="sidebar-top"><a class="logo " href="dashboard.html"><span class="logo-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></svg></span>GridConnect</a></div>
+        <nav class="nav" aria-label="Main">
+        <a href="dashboard.html">Dashboard</a>
+        <a href="previous-bills.html">Previous Bills</a>
+        <a href="transactions.html" class="active" aria-current="page">Transaction History</a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom"><a href="login.html">Logout</a></div>
+    </aside>
+    <div class="sidebar-backdrop" data-menu-close aria-hidden="true"></div>
+
+    <header class="topbar"><button type="button" class="mobile-menu-toggle" aria-label="Open navigation menu" aria-expanded="false" aria-controls="gridconnect-sidebar"><span></span><span></span><span></span></button><div class="user-chip"><span class="user-avatar" aria-hidden="true">A</span><span class="user-name">Amina Bello</span></div></header>
+
+    <main class="main">
+      <div class="content">
+        <div class="page-head page-head--row">
+          <h1>Transaction History</h1>
+          <span class="record-count">6 records</span>
+        </div>
+
+        <section class="card card--flush">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Transaction ID</th><th>Date</th><th>Billing Period</th><th class="num">Amount</th><th>Method</th><th>Status</th><th class="num">Action</th></tr>
+              </thead>
+              <tbody>
+            <tr>
+              <td class="strong">TXN-8942103</td><td>May 12, 2024</td><td>Apr 1 – Apr 30, 2024</td>
+              <td class="amount-cell">₦16,200.00</td><td>Card</td><td><span class="badge badge--paid">Paid</span></td>
+              <td class="num link-cell"><a href="receipt.html">View receipt</a></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-7821940</td><td>Apr 14, 2024</td><td>Mar 1 – Mar 31, 2024</td>
+              <td class="amount-cell">₦14,850.00</td><td>Bank transfer</td><td><span class="badge badge--paid">Paid</span></td>
+              <td class="num link-cell"><a href="receipt.html">View receipt</a></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-6510932</td><td>Mar 10, 2024</td><td>Feb 1 – Feb 29, 2024</td>
+              <td class="amount-cell">₦15,100.00</td><td>Card</td><td><span class="badge badge--pending">Pending</span></td>
+              <td class="num link-cell"><a href="receipt.html">View receipt</a></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-5409821</td><td>Feb 08, 2024</td><td>Jan 1 – Jan 31, 2024</td>
+              <td class="amount-cell">₦13,400.00</td><td>Bank transfer</td><td><span class="badge badge--paid">Paid</span></td>
+              <td class="num link-cell"><a href="receipt.html">View receipt</a></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-4318710</td><td>Jan 11, 2024</td><td>Dec 1 – Dec 31, 2023</td>
+              <td class="amount-cell">₦17,900.00</td><td>Card</td><td><span class="badge badge--paid">Paid</span></td>
+              <td class="num link-cell"><a href="receipt.html">View receipt</a></td>
+            </tr>
+            <tr>
+              <td class="strong">TXN-3207609</td><td>Dec 09, 2023</td><td>Nov 1 – Nov 30, 2023</td>
+              <td class="amount-cell">₦12,500.00</td><td>Bank transfer</td><td><span class="badge badge--failed">Failed</span></td>
+              <td class="num link-cell"><a href="receipt.html">View receipt</a></td>
+            </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script src="app.js" defer></script>
+</body>
+</html>
