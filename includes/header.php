@@ -8,8 +8,10 @@
  *   $layout     'app' (sidebar), 'auth' (login/register), 'center' (pay/receipt)
  *   $nav        'customer' or 'admin' (app layout only)
  *   $active     nav key to highlight (app layout only)
- *   $guard      'customer', 'admin', or '' (role check runs in app.js for now)
+ *   $guard      'customer', 'admin', or '' (enforced on the server below)
  */
+require_once __DIR__ . '/../src/Helpers/session.php';
+
 $pageTitle = $pageTitle ?? 'GridConnect';
 $page      = $page ?? '';
 $root      = $root ?? '';
@@ -18,6 +20,12 @@ $nav       = $nav ?? 'customer';
 $active    = $active ?? '';
 $guard     = $guard ?? '';
 $bodyClass = $layout === 'auth' ? 'auth-page' : '';
+
+// Server-side page guard: send visitors without the right login to the login page.
+if (($guard === 'customer' && !current_customer_id()) || ($guard === 'admin' && !current_admin_id())) {
+    header('Location: ' . $root . 'login.php');
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">

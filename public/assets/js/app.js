@@ -1,46 +1,46 @@
-/* GridConnect frontend: demo logic using localStorage only.
-   Backend handoff: replace each localStorage read/write with fetch() calls to api/*.php.
-   Paths come from <body data-root>, so this file works in public/ and public/admin/. */
+/* GridConnect page logic. Data comes from the PHP API through window.GridConnectApi (api.js).
+   Nothing is stored in the browser. Page access is enforced on the server (includes/header.php). */
 (() => {
   'use strict';
 
   const body = document.body;
   const ROOT = body.dataset.root || '';   // '' in public/, '../' in public/admin/
   const PAGE = body.dataset.page || '';
-  const GUARD = body.dataset.guard || ''; // 'customer', 'admin' or ''
+  const api = window.GridConnectApi;
 
-  const KEYS = {
-    users: 'gc_users_v1', bills: 'gc_bills_v1', payments: 'gc_payments_v1',
-    session: 'gc_session_v1', lastReceipt: 'gc_last_receipt_v1', selectedBill: 'gc_selected_bill_v1'
-  };
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
   const money = n => new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN' }).format(Number(n) || 0);
-  const read = (key, fallback = []) => { try { const v = JSON.parse(localStorage.getItem(key)); return v ?? fallback; } catch { return fallback; } };
-  const write = (key, value) => localStorage.setItem(key, JSON.stringify(value));
-  const today = () => new Date().toISOString();
   const safe = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const initials = name => (name || 'U').trim().split(/\s+/).slice(0, 2).map(p => p[0]).join('').toUpperCase();
-  const currentUser = () => { const s = read(KEYS.session, null); return s ? read(KEYS.users, []).find(u => u.email === s.email) || null : null; };
 
-  function seed() {
-    if (!localStorage.getItem(KEYS.users)) write(KEYS.users, [
-      { name: 'Amina Bello', email: 'amina.bello@example.ng', phone: '+234 800 000 0000', address: 'Lagos, Nigeria', meter: '45012345678', password: 'Password123!', role: 'customer' },
-      { name: 'GridConnect Admin', email: 'admin@gridconnect.ng', phone: '', address: '', meter: '', password: 'Admin123!', role: 'admin' }
-    ]);
-    if (!localStorage.getItem(KEYS.bills)) write(KEYS.bills, [
-      { id: 'BIL-2026-001', email: 'amina.bello@example.ng', meter: '45012345678', period: 'Sep 1 – Sep 30, 2026', units: 325, due: 'Oct 25, 2026', amount: 18450, status: 'Pending', created: today() },
-      { id: 'BIL-2026-000', email: 'amina.bello@example.ng', meter: '45012345678', period: 'Aug 1 – Aug 31, 2026', units: 290, due: 'Sep 15, 2026', amount: 16200, status: 'Paid', created: today() }
-    ]);
-    if (!localStorage.getItem(KEYS.payments)) write(KEYS.payments, []);
-  }
-  seed();
+  // MySQL and PostgreSQL send dates as "2026-10-25" or "2026-10-25 14:32:00". Safari needs the "T" form.
+  const toDate = s => new Date(String(s).length === 10 ? s + 'T00:00:00' : String(s).replace(' ', 'T'));
+  const dateShort = s => toDate(s).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+  const period = (start, end) => `${dateShort(start)} – ${dateShort(end)}`;
+  const billId = id => `BIL-${String(id).padStart(6, '0')}`;
+  const txnId = id => `TXN-${String(id).padStart(6, '0')}`;
+
+  const STATUS_TEXT = { pending: 'Pending', paid: 'Paid', overdue: 'Overdue', success: 'Paid', failed: 'Failed' };
+  const badge = status => {
+    const cls = status === 'paid' || status === 'success' ? 'badge--paid-green'
+              : status === 'failed' ? 'badge--failed' : 'badge--pending';
+    return `<span class="badge ${cls}">${safe(STATUS_TEXT[status] || status)}</span>`;
+  };
 
   function message(el, text, type = 'error') {
     if (!el) return;
     el.textContent = text; el.hidden = false;
     el.classList.remove('form-message--error', 'form-message--success');
     el.classList.add(type === 'success' ? 'form-message--success' : 'form-message--error');
+  }
+
+  // Button text is restored from its original label when busy ends.
+  function setBusy(btn, busy, text) {
+    if (!btn) return;
+    if (busy && !btn.dataset.label) btn.dataset.label = btn.textContent;
+    btn.disabled = busy;
+    btn.textContent = busy ? text : (btn.dataset.label || text);
   }
 
   function renderTable(tbody, rows, columns, emptyText) {
@@ -51,7 +51,7 @@
       : `<tr><td colspan="${columns.length}" class="empty-state">${safe(emptyText)}</td></tr>`;
   }
 
-  // ---------- Shared UI: mobile menu, logout, placeholder links ----------
+  // ---------- Shared UI: mobile menu, placeholder links, search forms ----------
   const menuToggle = $('.mobile-menu-toggle');
   const sidebar = $('.sidebar');
   const backdrop = $('.sidebar-backdrop');
@@ -62,91 +62,103 @@
   sidebar?.querySelectorAll('a').forEach(a => a.addEventListener('click', closeMenu));
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 
-  // Logout: clear the demo login here; logout.php ends the PHP session.
-  $$('a[href$="logout.php"]').forEach(a => a.addEventListener('click', () => localStorage.removeItem(KEYS.session)));
-
   $$('form.search').forEach(form => form.addEventListener('submit', e => e.preventDefault()));
   $$('a[href="#"]').forEach(a => a.addEventListener('click', e => {
     e.preventDefault();
     const tr = a.closest('tr');
     if (tr) tr.classList.toggle('row-highlight');
-    else message($('.page-head'), 'This action will be connected to the backend API.', 'success');
+    else message($('.page-head'), 'This action is not available yet.', 'success');
   }));
 
-  // ---------- Role guard (demo; replace with a PHP session check) ----------
-  function requireRole(role) {
-    const user = currentUser();
-    if (!user) { location.replace(ROOT + 'login.php'); return null; }
-    if (role && user.role !== role) { location.replace(ROOT + (user.role === 'admin' ? 'admin/dashboard.php' : 'dashboard.php')); return null; }
-    return user;
-  }
-  const user = GUARD ? requireRole(GUARD) : currentUser();
-  if (GUARD && !user) return; // redirect already started
-
-  if (user) {
-    const nameEl = $('.user-name');
-    if (nameEl) nameEl.textContent = user.role === 'admin' ? 'Administrator' : user.name;
-    const avatarEl = $('.user-avatar');
-    if (avatarEl) avatarEl.textContent = user.role === 'admin' ? 'AD' : initials(user.name);
+  // ---------- Header identity ----------
+  async function loadUser() {
+    try {
+      const me = await api.me();
+      const nameEl = $('.user-name');
+      if (nameEl) nameEl.textContent = me.role === 'admin' ? 'Administrator' : me.name;
+      const avatar = $('.user-avatar');
+      if (avatar) avatar.textContent = me.role === 'admin' ? 'AD' : initials(me.name);
+      return me;
+    } catch {
+      return null;   // api.js already redirects to login on 401
+    }
   }
 
   // ---------- Login ----------
   const loginForm = $('#login-form');
-  if (loginForm) loginForm.addEventListener('submit', e => {
+  if (loginForm) loginForm.addEventListener('submit', async e => {
     e.preventDefault();
-    const email = $('#email').value.trim().toLowerCase(), password = $('#password').value;
-    const found = read(KEYS.users, []).find(u => u.email.toLowerCase() === email && u.password === password);
-    if (!found) { message($('#login-message'), 'Email or password is incorrect. Please try again.'); return; }
-    write(KEYS.session, { email: found.email, role: found.role, created: today() });
-    location.href = found.role === 'admin' ? 'admin/dashboard.php' : 'dashboard.php';
+    const btn = $('button[type="submit"]', loginForm);
+    setBusy(btn, true, 'Logging in…');
+    try {
+      const res = await api.login($('#email').value.trim(), $('#password').value);
+      location.href = res.role === 'admin' ? 'admin/dashboard.php' : 'dashboard.php';
+    } catch (err) {
+      message($('#login-message'), err.message);
+      setBusy(btn, false, 'Log in');
+    }
   });
 
   // ---------- Register ----------
   const registerForm = $('#register-form');
-  if (registerForm) registerForm.addEventListener('submit', e => {
+  if (registerForm) registerForm.addEventListener('submit', async e => {
     e.preventDefault();
     const data = new FormData(registerForm);
-    const name = String(data.get('full_name') || '').trim();
-    const email = String(data.get('email') || '').trim().toLowerCase();
-    const password = String(data.get('password') || ''), confirm = String(data.get('confirm_password') || '');
-    const phone = String(data.get('phone') || '').trim();
-    const meter = String(data.get('meter_number') || '').trim();
-    // Format rule: local Nigerian mobile number, exactly 11 digits.
-    if (!/^0[789]\d{9}$/.test(phone)) { message($('#register-message'), 'Enter a valid 11-digit Nigerian mobile number starting with 070–079, 080–089, or 090–099.'); $('#phone').focus(); return; }
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { message($('#register-message'), 'Enter a valid email address.'); $('#email').focus(); return; }
-    if (!meter) { message($('#register-message'), 'Please enter your meter number.'); $('#meter-number').focus(); return; }
-    if (password !== confirm) { message($('#register-message'), 'Your passwords do not match.'); $('#confirm-password').focus(); return; }
-    const users = read(KEYS.users, []);
-    if (users.some(u => u.email.toLowerCase() === email)) { message($('#register-message'), 'An account with this email already exists. Please log in.'); return; }
-    if (users.some(u => u.meter === meter)) { message($('#register-message'), 'That meter number is already registered.'); return; }
-    users.push({ name, email, phone, address: String(data.get('address') || '').trim(), meter, password, role: 'customer' });
-    write(KEYS.users, users);
-    const bills = read(KEYS.bills, []);
-    bills.unshift({ id: 'BIL-' + Date.now(), email, meter, period: new Date().toLocaleString('en', { month: 'short', year: 'numeric' }), units: 0, due: new Date(Date.now() + 14 * 86400000).toLocaleDateString('en-GB'), amount: 0, status: 'No bill', created: today() });
-    write(KEYS.bills, bills);
-    message($('#register-message'), 'Account created. Taking you to login…', 'success');
-    setTimeout(() => location.href = 'login.php', 700);
+    const errEl = $('#register-message');
+    const password = String(data.get('password') || '');
+    if (password !== String(data.get('confirm_password') || '')) {
+      message(errEl, 'Your passwords do not match.');
+      $('#confirm-password').focus();
+      return;
+    }
+    const btn = $('button[type="submit"]', registerForm);
+    setBusy(btn, true, 'Creating account…');
+    try {
+      await api.register({
+        full_name: String(data.get('full_name') || '').trim(),
+        email: String(data.get('email') || '').trim(),
+        phone: String(data.get('phone') || '').trim(),
+        address: String(data.get('address') || '').trim(),
+        meter_number: String(data.get('meter_number') || '').trim(),
+        password,
+      });
+      message(errEl, 'Account created. Taking you to login…', 'success');
+      setTimeout(() => { location.href = 'login.php'; }, 700);
+    } catch (err) {
+      message(errEl, err.message);
+      setBusy(btn, false, 'Create account');
+    }
   });
 
-  // ---------- Customer pages ----------
+  // ---------- Customer: dashboard ----------
   function fillBill(bill) {
-    $('#bill-period').textContent = bill.period;
-    $('#bill-status').textContent = bill.status;
-    $('#bill-units').textContent = `${bill.units} kWh`;
-    $('#bill-due').textContent = bill.due;
+    $('#bill-period').textContent = period(bill.period_start, bill.period_end);
+    const status = $('#bill-status');
+    status.textContent = STATUS_TEXT[bill.bill_status] || bill.bill_status;
+    status.className = 'badge ' + (bill.bill_status === 'paid' ? 'badge--paid-green' : 'badge--pending');
+    $('#bill-units').textContent = `${Number(bill.units_kwh)} kWh`;
+    $('#bill-due').textContent = dateShort(bill.due_date);
     $('#bill-amount').textContent = money(bill.amount);
     const pay = $('#pay-now');
-    if (pay) pay.href = `pay.php?bill=${encodeURIComponent(bill.id)}`;
-    write(KEYS.selectedBill, bill.id);
+    if (pay) pay.href = `pay.php?bill=${encodeURIComponent(bill.bill_id)}`;
   }
 
-  if (PAGE === 'dashboard') {
-    $('#customer-name').textContent = user.name;
-    $('#customer-email').textContent = user.email;
-    $('#customer-meter').textContent = user.meter;
-    const latest = read(KEYS.bills, []).find(b => b.email === user.email && b.status !== 'Paid');
-    if (latest) fillBill(latest);
-    else { $('#bill-status').textContent = 'All bills paid'; $('#bill-amount').textContent = money(0); }
+  async function initDashboard(me) {
+    $('#customer-name').textContent = me.name;
+    $('#customer-email').textContent = me.email;
+    $('#customer-meter').textContent = me.meter || '—';
+
+    try {
+      const { bill } = await api.currentBill();
+      fillBill(bill);
+    } catch (err) {
+      if (err.status === 404) {
+        $('#bill-status').textContent = 'All bills paid';
+        $('#bill-amount').textContent = money(0);
+      } else {
+        $('#bill-status').textContent = 'Could not load bill';
+      }
+    }
 
     const checkForm = $('#check-bill-form');
     checkForm.addEventListener('submit', async e => {
@@ -155,176 +167,203 @@
       const error = $('#meter-error');
       error.hidden = true;
       if (!entered) { error.textContent = 'Enter your meter number.'; error.hidden = false; return; }
-      const btn = $('button[type="submit"]', checkForm), old = btn.textContent;
-      btn.disabled = true; btn.textContent = 'Checking…';
-      await new Promise(r => setTimeout(r, 450));  // simulates an API call
-      const owner = read(KEYS.users, []).find(u => u.meter === entered && u.role === 'customer');
-      const bill = read(KEYS.bills, []).find(b => b.meter === entered && b.status !== 'Paid');
-      if (!owner || owner.email !== user.email || !bill) {
-        error.textContent = 'No unpaid bill was found for this meter number. Check the number and try again.';
-        error.hidden = false;
-      } else {
+      const btn = $('button[type="submit"]', checkForm);
+      setBusy(btn, true, 'Checking…');
+      try {
+        const { bill } = await api.currentBill(entered);
         fillBill(bill);
         $('#current-bill').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (err) {
+        error.textContent = err.status === 404
+          ? 'No unpaid bill was found for this meter number. Check the number and try again.'
+          : err.message;
+        error.hidden = false;
+      } finally {
+        setBusy(btn, false, 'Get bill');
       }
-      btn.disabled = false; btn.textContent = old;
     });
   }
 
-  if (PAGE === 'bills') {
-    const own = read(KEYS.bills, []).filter(b => b.email === user.email);
-    renderTable($('#rows'), own, [
-      b => `<span class="strong">${safe(b.id)}</span>`,
-      b => safe(b.period),
-      b => `${safe(b.units)} kWh`,
+  // ---------- Customer: previous bills, transactions, payment, receipt ----------
+  async function initBills() {
+    const { bills } = await api.bills();
+    renderTable($('#rows'), bills, [
+      b => `<span class="strong">${safe(billId(b.bill_id))}</span>`,
+      b => safe(period(b.period_start, b.period_end)),
+      b => `${safe(Number(b.units_kwh))} kWh`,
       b => `<span class="amount-cell">${money(b.amount)}</span>`,
-      b => safe(b.due),
-      b => `<span class="badge ${b.status === 'Paid' ? 'badge--paid-green' : 'badge--pending'}">${safe(b.status)}</span>`
+      b => safe(dateShort(b.due_date)),
+      b => badge(b.bill_status),
     ], 'No bills found for this account.');
   }
 
-  if (PAGE === 'transactions') {
-    const own = read(KEYS.payments, []).filter(p => p.email === user.email);
-    renderTable($('#rows'), own, [
-      p => `<span class="strong">${safe(p.id)}</span>`,
-      p => safe(new Date(p.date).toLocaleDateString()),
-      p => safe(p.billId),
-      p => `<span class="amount-cell">${money(p.amount)}</span>`,
-      p => safe(p.method === 'bank_transfer' ? 'Bank transfer' : 'Card'),
-      p => `<span class="badge badge--paid-green">${safe(p.status)}</span>`,
-      p => `<a class="btn btn--small" href="receipt.php" data-receipt="${safe(p.id)}">View receipt</a>`
+  async function initTransactions() {
+    const { transactions } = await api.transactions();
+    renderTable($('#rows'), transactions, [
+      t => `<span class="strong">${safe(txnId(t.payment_id))}</span>`,
+      t => safe(dateShort(t.transaction_date)),
+      t => safe(period(t.period_start, t.period_end)),
+      t => `<span class="amount-cell">${money(t.amount)}</span>`,
+      t => safe(t.payment_method === 'bank_transfer' ? 'Bank transfer' : 'Card'),
+      t => badge(t.status),
+      t => t.receipt_number ? `<a class="btn btn--small" href="receipt.php?id=${encodeURIComponent(t.payment_id)}">View receipt</a>` : '—',
     ], 'No transactions yet. Your completed payments will appear here.');
     const count = $('#record-count');
-    if (count) count.textContent = `${own.length} record${own.length === 1 ? '' : 's'}`;
-    $$('a[data-receipt]').forEach(a => a.addEventListener('click', () => {
-      const p = own.find(x => x.id === a.dataset.receipt);
-      if (p) write(KEYS.lastReceipt, p);
-    }));
+    if (count) count.textContent = `${transactions.length} record${transactions.length === 1 ? '' : 's'}`;
   }
 
-  if (PAGE === 'pay') {
+  async function initPay() {
     const form = $('#payment-form');
     const submitBtn = $('.payment-submit', form);
-    const bills = read(KEYS.bills, []);
-    const selectedId = new URLSearchParams(location.search).get('bill') || read(KEYS.selectedBill, null);
-    const bill = bills.find(b => b.id === selectedId && b.email === user.email && b.status !== 'Paid')
-              || bills.find(b => b.email === user.email && b.status !== 'Paid');
-    if (!bill) {
-      message($('#payment-message'), 'There are no unpaid bills available for this account.');
-      submitBtn.disabled = true;
-    } else {
-      $('#pay-bill-id').textContent = bill.id;
-      $('#pay-amount').textContent = money(bill.amount);
-      form.elements.bill_id.value = bill.id;
-    }
+    const error = $('#payment-message');
+    const requested = Number(new URLSearchParams(location.search).get('bill')) || null;
 
-    form.addEventListener('submit', e => {
+    let bill = null;
+    try {
+      const { bills } = await api.bills();
+      const open = bills.filter(b => b.bill_status !== 'paid');
+      bill = open.find(b => Number(b.bill_id) === requested) || open[0] || null;
+    } catch (err) {
+      message(error, err.message);
+    }
+    if (!bill) {
+      message(error, 'There are no unpaid bills available for this account.');
+      submitBtn.disabled = true;
+      return;
+    }
+    $('#pay-bill-id').textContent = billId(bill.bill_id);
+    $('#pay-amount').textContent = money(bill.amount);
+    if (form.elements.bill_id) form.elements.bill_id.value = bill.bill_id;
+
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      if (!bill || submitBtn.disabled) return;
-      const label = $('.payment-submit__label', submitBtn), spinner = $('.payment-spinner', submitBtn);
-      const error = $('#payment-message'), success = $('#payment-success');
+      if (submitBtn.disabled) return;
+      const label = $('.payment-submit__label', submitBtn);
+      const spinner = $('.payment-spinner', submitBtn);
+      const success = $('#payment-success');
+      const method = $('input[name="payment_method"]:checked', form)?.value || 'card';
       error.hidden = true;
       submitBtn.disabled = true; submitBtn.setAttribute('aria-busy', 'true');
       label.textContent = 'Processing payment'; spinner.hidden = false;
-
-      setTimeout(() => {   // demo only: imitates a payment provider's wait
-        try {
-          const stamp = Date.now().toString().slice(-8);
-          const method = $('input[name="payment_method"]:checked', form)?.value || 'card';
-          const payment = { id: 'TXN-' + stamp, receipt: 'REC-' + stamp + '-GC', email: user.email, name: user.name, meter: user.meter, billId: bill.id, amount: bill.amount, method, status: 'Paid', date: today() };
-          write(KEYS.payments, [payment, ...read(KEYS.payments, [])]);
-          write(KEYS.bills, read(KEYS.bills, []).map(b => b.id === bill.id ? { ...b, status: 'Paid' } : b));
-          write(KEYS.lastReceipt, payment);
-          success.hidden = false;
-          setTimeout(() => { location.href = ROOT + 'receipt.php'; }, 1250);
-        } catch {
-          message(error, 'The demo payment could not be saved. No receipt was created. Please try again.');
-          submitBtn.disabled = false; submitBtn.removeAttribute('aria-busy');
-          label.textContent = 'Make Payment'; spinner.hidden = true;
-        }
-      }, 1100);
+      try {
+        const res = await api.pay(Number(bill.bill_id), method);
+        success.hidden = false;
+        setTimeout(() => { location.href = `receipt.php?id=${encodeURIComponent(res.payment_id)}`; }, 1250);
+      } catch (err) {
+        message(error, err.message);
+        submitBtn.disabled = false; submitBtn.removeAttribute('aria-busy');
+        label.textContent = 'Make Payment'; spinner.hidden = true;
+      }
     });
   }
 
-  if (PAGE === 'receipt') {
-    const r = read(KEYS.lastReceipt, null);
+  async function initReceipt() {
     const main = $('main.panel');
-    if (r && main) {
+    const id = new URLSearchParams(location.search).get('id');
+    try {
+      const { receipt: r } = await api.receipt(id);
       const vals = $$('.receipt-amount strong, .receipt-list li span:last-child', main);
-      const set = [money(r.amount), r.receipt, new Date(r.date).toLocaleString(), r.name, r.meter, r.billId, r.method === 'bank_transfer' ? 'Bank transfer' : 'Card'];
-      vals.forEach((el, i) => { if (set[i] !== undefined) el.textContent = set[i]; });
+      const values = [
+        money(r.amount),
+        r.receipt_number,
+        toDate(r.issue_date).toLocaleString('en-GB'),
+        r.customer_name,
+        r.meter_number,
+        period(r.period_start, r.period_end),
+        r.payment_method === 'bank_transfer' ? 'Bank transfer' : 'Card',
+      ];
+      vals.forEach((el, i) => { if (values[i] !== undefined) el.textContent = values[i]; });
+    } catch (err) {
+      if (main) main.insertAdjacentHTML('afterbegin', `<p class="form-message form-message--error">${safe(err.message)}</p>`);
     }
   }
 
-  // ---------- Admin pages ----------
-  const customers = () => read(KEYS.users, []).filter(u => u.role === 'customer');
-  const payments = () => read(KEYS.payments, []);
-  const bills = () => read(KEYS.bills, []);
-  const nameFor = email => read(KEYS.users, []).find(u => u.email === email)?.name || '—';
-
-  function bindSearch(render) {
+  // ---------- Admin ----------
+  function bindSearch(load) {
     const input = $('#search');
-    render();
-    input?.addEventListener('input', render);
+    let timer;
+    const run = () => load(input?.value.trim() || '').catch(err => message($('.page-head') || main(), err.message));
+    input?.addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(run, 250); });
+    return run();
   }
+  const main = () => $('main') || body;
 
-  if (PAGE === 'admin-dashboard') {
-    const stats = $$('.stat-value');
-    const all = bills();
-    stats[0].textContent = customers().length;
-    stats[1].textContent = all.length;
-    stats[2].textContent = money(payments().filter(p => p.status === 'Paid').reduce((s, p) => s + p.amount, 0));
-    stats[3].textContent = money(all.filter(b => b.status !== 'Paid').reduce((s, b) => s + b.amount, 0));
-    renderTable($('#rows'), payments().slice(0, 5), [
-      p => `<span class="strong">${safe(p.id)}</span>`,
-      p => `<span class="dark">${safe(p.name)}</span>`,
-      p => safe(p.meter),
+  async function initAdminDashboard() {
+    const { stats: s } = await api.adminStats();
+    const values = $$('.stat-value');
+    values[0].textContent = s.total_customers;
+    values[1].textContent = s.total_bills;
+    values[2].textContent = money(s.payments_received);
+    values[3].textContent = money(s.pending_amount);
+
+    const { payments } = await api.adminPayments();
+    renderTable($('#rows'), payments.slice(0, 5), [
+      p => `<span class="strong">${safe(txnId(p.payment_id))}</span>`,
+      p => `<span class="dark">${safe(p.customer_name)}</span>`,
+      p => safe(p.meter_number),
       p => `<span class="amount-cell">${money(p.amount)}</span>`,
-      p => `<span class="badge badge--paid-green">${safe(p.status)}</span>`
+      p => badge(p.payment_status),
     ], 'No payments yet.');
   }
 
-  if (PAGE === 'admin-customers') {
-    bindSearch(() => {
-      const q = ($('#search')?.value || '').toLowerCase();
-      const list = customers().filter(u => [u.name, u.email, u.meter, u.phone].join(' ').toLowerCase().includes(q));
-      renderTable($('#rows'), list, [
-        u => `<span class="dark">${safe(u.name)}</span>`,
-        u => safe(u.email),
-        u => safe(u.phone),
-        u => `<span class="dark strong">${safe(u.meter)}</span>`
+  function initAdminCustomers() {
+    return bindSearch(async q => {
+      const { customers } = await api.adminCustomers(q);
+      renderTable($('#rows'), customers, [
+        c => `<span class="dark">${safe(c.name)}</span>`,
+        c => safe(c.email),
+        c => safe(c.phone),
+        c => `<span class="dark strong">${safe(c.meter_number)}</span>`,
       ], 'No customers match your search.');
     });
   }
 
-  if (PAGE === 'admin-bills') {
-    bindSearch(() => {
-      const q = ($('#search')?.value || '').toLowerCase();
-      const list = bills().filter(b => [b.id, b.meter, b.status, b.period, nameFor(b.email)].join(' ').toLowerCase().includes(q));
-      renderTable($('#rows'), list, [
-        b => `<span class="link-cell">${safe(b.id)}</span>`,
-        b => `<span class="dark">${safe(nameFor(b.email))}</span>`,
-        b => safe(b.meter),
-        b => safe(b.period),
+  function initAdminBills() {
+    return bindSearch(async q => {
+      const { bills } = await api.adminBills(q);
+      renderTable($('#rows'), bills, [
+        b => `<span class="link-cell">${safe(billId(b.bill_id))}</span>`,
+        b => `<span class="dark">${safe(b.customer_name)}</span>`,
+        b => safe(b.meter_number),
+        b => safe(period(b.period_start, b.period_end)),
         b => `<span class="amount-cell">${money(b.amount)}</span>`,
-        b => `<span class="badge ${b.status === 'Paid' ? 'badge--paid' : 'badge--pending'}">${safe(b.status)}</span>`
+        b => badge(b.bill_status),
       ], 'No bills match your search.');
     });
   }
 
-  if (PAGE === 'admin-payments') {
-    bindSearch(() => {
-      const q = ($('#search')?.value || '').toLowerCase();
-      const list = payments().filter(p => [p.id, p.name, p.meter, p.status].join(' ').toLowerCase().includes(q));
-      renderTable($('#rows'), list, [
-        p => `<span class="link-cell">${safe(p.id)}</span>`,
-        p => `<span class="dark">${safe(p.name)}</span>`,
-        p => safe(p.meter),
+  function initAdminPayments() {
+    return bindSearch(async q => {
+      const { payments } = await api.adminPayments(q);
+      renderTable($('#rows'), payments, [
+        p => `<span class="link-cell">${safe(txnId(p.payment_id))}</span>`,
+        p => `<span class="dark">${safe(p.customer_name)}</span>`,
+        p => safe(p.meter_number),
         p => `<span class="amount-cell">${money(p.amount)}</span>`,
-        p => safe(new Date(p.date).toLocaleDateString()),
-        p => `<span class="badge badge--paid-green">${safe(p.status)}</span>`
+        p => safe(dateShort(p.payment_date)),
+        p => badge(p.payment_status),
       ], 'No payments match your search.');
     });
+  }
+
+  // ---------- Start the page ----------
+  // Login and register only need their forms (wired above). Other pages load the signed-in user first.
+  const PAGE_INIT = {
+    dashboard: initDashboard,
+    bills: initBills,
+    transactions: initTransactions,
+    pay: initPay,
+    receipt: initReceipt,
+    'admin-dashboard': initAdminDashboard,
+    'admin-customers': initAdminCustomers,
+    'admin-bills': initAdminBills,
+    'admin-payments': initAdminPayments,
+  };
+  const init = PAGE_INIT[PAGE];
+  if (init) {
+    loadUser()
+      .then(me => me && init(me))
+      .catch(err => message($('.page-head') || main(), err.message));
   }
 
   // Responsive labels for any static table cells.

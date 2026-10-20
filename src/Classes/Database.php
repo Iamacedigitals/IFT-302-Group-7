@@ -39,5 +39,13 @@ class Database
         return self::connection()->getAttribute(PDO::ATTR_DRIVER_NAME);
     }
 
+    // Id of the row just inserted. PostgreSQL needs the identity sequence name; MySQL does not.
+    public static function lastId(PDO $pdo, string $table, string $column): string
+    {
+        return $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'pgsql'
+            ? $pdo->lastInsertId("{$table}_{$column}_seq")
+            : $pdo->lastInsertId();
+    }
+
     private function __construct() {}
 }
