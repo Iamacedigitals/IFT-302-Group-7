@@ -28,8 +28,8 @@ Example: `feat: add current bill API endpoint`
 |---|---|---|
 | Diagrams (use case, activity, ERD) | `docs/diagrams/` | Laura, Temiloluwa, Olamide|
 | Database | `database/` | David |
-| OOP classes | `src/` | |
+| OOP classes | `src/` | David|
 | API | `api/` | |
-| Frontend pages + CSS | `public/`, `includes/` | |
-| JavaScript / fetch | `public/assets/js/` | |
+| Frontend pages + CSS | `public/`, `includes/` | Laura, Olamide, Temiloluwa, David|
+| JavaScript / fetch | `public/assets/js/` | Laura|
 | Admin dashboard | `public/admin/`, `api/admin/` | |
