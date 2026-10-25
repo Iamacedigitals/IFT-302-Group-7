@@ -27,9 +27,9 @@ Example: `feat: add current bill API endpoint`
 | Area | Folders | Owner |
 |---|---|---|
 | Diagrams (use case, activity, ERD) | `docs/diagrams/` | Laura, Temiloluwa, Olamide|
-| Database | `database/` | David |
+| Database and Data validations | `database/` | David, Glory |
 | OOP classes | `src/` | David|
-| API | `api/` | |
-| Frontend pages + CSS | `public/`, `includes/` | Laura, Olamide, Temiloluwa, David|
-| JavaScript / fetch | `public/assets/js/` | Laura|
-| Admin dashboard | `public/admin/`, `api/admin/` | |
+| API and backend operations| `api/` | David, Glory, |
+| Frontend pages + CSS | `public/`, `includes/` | Laura, Olamide, Temiloluwa|
+| JavaScript / fetch | `public/assets/js/` | Laura, Olamide, Temiloluwa|
+| Admin dashboard | `public/admin/`, `api/admin/` | Laura, Olamide, Temiloluwa, David |
