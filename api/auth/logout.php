@@ -1,3 +1,10 @@
 <?php
-// API: /api/auth/logout.php (JSON in/out)
-// Owner: (assign team member)
+// API: POST /api/auth/logout.php
+// Owner: David
+require_once __DIR__ . '/../../src/Helpers/response.php';
+require_once __DIR__ . '/../../src/Helpers/session.php';
+
+start_session();
+$_SESSION = [];
+session_destroy();
+json_out(['ok' => true]);

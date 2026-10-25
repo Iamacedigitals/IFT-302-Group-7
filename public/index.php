@@ -1,3 +1,4 @@
 <?php
-// Page: index
-// Owner: (assign team member)
+// Entry point: visitors start at the login page.
+header('Location: login.php');
+exit;

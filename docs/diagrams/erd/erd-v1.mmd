@@ -1,0 +1,70 @@
+%% ERD v1: must match database/schema.sql (MySQL). PK = primary key, FK = foreign key.
+%% Export a PNG as docs/diagrams/erd/erd-v1.png (CONTRIBUTING: commit source AND PNG).
+erDiagram
+    CUSTOMERS ||--o{ ACCOUNTS : has
+    CUSTOMERS ||--o{ METERS : owns
+    CUSTOMERS ||--o{ TRANSACTIONS : makes
+    METERS ||--o{ BILLS : billed_by
+    BILLS ||--o{ PAYMENTS : paid_by
+    PAYMENTS ||--o| RECEIPTS : generates
+    PAYMENTS ||--o{ TRANSACTIONS : recorded_as
+    ADMINS {
+        int admin_id PK
+        varchar name
+        varchar email UK
+        varchar password_hash
+    }
+    CUSTOMERS {
+        int customer_id PK
+        varchar name
+        varchar email UK
+        char phone
+        varchar address
+        varchar password_hash
+        datetime created_at
+    }
+    ACCOUNTS {
+        int account_id PK
+        int customer_id FK
+        varchar account_number UK
+        enum account_status
+    }
+    METERS {
+        int meter_id PK
+        int customer_id FK
+        varchar meter_number UK
+    }
+    BILLS {
+        int bill_id PK
+        int meter_id FK
+        date billing_date
+        date due_date
+        date period_start
+        date period_end
+        decimal units_kwh
+        decimal amount
+        enum bill_status
+    }
+    PAYMENTS {
+        int payment_id PK
+        int bill_id FK
+        decimal amount
+        datetime payment_date
+        enum payment_status
+        enum payment_method
+        varchar gateway_transaction_id UK
+    }
+    RECEIPTS {
+        int receipt_id PK
+        int payment_id FK
+        varchar receipt_number UK
+        datetime issue_date
+    }
+    TRANSACTIONS {
+        int transaction_id PK
+        int customer_id FK
+        int payment_id FK
+        datetime transaction_date
+        decimal amount
+        enum status
+    }
