@@ -14,20 +14,22 @@ class Payment
             throw new InvalidArgumentException('Unknown payment method.');
         }
 
-        $stmt = $this->pdo->prepare(
-            'SELECT b.bill_id, b.amount
-             FROM bills b
-             JOIN meters m ON m.meter_id = b.meter_id
-             WHERE b.bill_id = :bill AND m.customer_id = :customer AND b.bill_status <> :paid'
-        );
-        $stmt->execute([':bill' => $billId, ':customer' => $customerId, ':paid' => 'paid']);
-        $bill = $stmt->fetch();
-        if (!$bill) {
-            throw new InvalidArgumentException('No unpaid bill was found.');
-        }
-
         $this->pdo->beginTransaction();
         try {
+            // Lock the bill row so two quick clicks cannot both pay it.
+            $stmt = $this->pdo->prepare(
+                'SELECT b.bill_id, b.amount
+                 FROM bills b
+                 JOIN meters m ON m.meter_id = b.meter_id
+                 WHERE b.bill_id = :bill AND m.customer_id = :customer AND b.bill_status <> :paid
+                 FOR UPDATE OF b'
+            );
+            $stmt->execute([':bill' => $billId, ':customer' => $customerId, ':paid' => 'paid']);
+            $bill = $stmt->fetch();
+            if (!$bill) {
+                throw new InvalidArgumentException('No unpaid bill was found.');
+            }
+
             $ins = $this->pdo->prepare(
                 'INSERT INTO payments (bill_id, amount, payment_method, payment_status)
                  VALUES (:bill, :amount, :method, :status)'
@@ -85,6 +87,21 @@ class Payment
             'receipt_number' => $receiptNumber,
             'message'        => $ok ? 'Payment successful.' : 'Payment failed. No receipt was created.',
         ];
+    }
+
+    // One payment's status, only if it belongs to this customer.
+    public function statusForCustomer(int $paymentId, int $customerId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT p.payment_id, p.bill_id, p.amount, p.payment_status, p.payment_method,
+                    p.payment_date, p.gateway_transaction_id
+             FROM payments p
+             JOIN bills b ON b.bill_id = p.bill_id
+             JOIN meters m ON m.meter_id = b.meter_id
+             WHERE p.payment_id = :payment AND m.customer_id = :customer'
+        );
+        $stmt->execute([':payment' => $paymentId, ':customer' => $customerId]);
+        return $stmt->fetch() ?: null;
     }
 
     // This customer's payment history, newest first, with receipt numbers where they exist.

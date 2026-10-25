@@ -15,6 +15,16 @@ class Meter
         return $stmt->fetch() ?: null;
     }
 
+    // Only returns the meter if it belongs to this customer.
+    public function findForCustomer(string $meterNumber, int $customerId): ?array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT meter_number FROM meters WHERE meter_number = :number AND customer_id = :customer'
+        );
+        $stmt->execute([':number' => $meterNumber, ':customer' => $customerId]);
+        return $stmt->fetch() ?: null;
+    }
+
     public function link(int $customerId, string $meterNumber): int
     {
         $stmt = $this->pdo->prepare(

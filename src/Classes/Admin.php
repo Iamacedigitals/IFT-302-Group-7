@@ -11,8 +11,12 @@ class Admin
         $stmt = $this->pdo->prepare('SELECT admin_id, name, email, password_hash FROM admins WHERE email = :email');
         $stmt->execute([':email' => strtolower(trim($email))]);
         $admin = $stmt->fetch();
-        if (!$admin || !password_verify($password, $admin['password_hash'])) {
+        if (!$admin || !verify_password($password, $admin['password_hash'])) {
             return null;
+        }
+        if (password_needs_upgrade($admin['password_hash'])) {
+            $this->pdo->prepare('UPDATE admins SET password_hash = :hash WHERE admin_id = :id')
+                ->execute([':hash' => hash_password($password), ':id' => $admin['admin_id']]);
         }
         unset($admin['password_hash']);
         return $admin;

@@ -20,8 +20,12 @@ class Customer
     public function login(string $email, string $password): ?array
     {
         $customer = $this->findByEmail($email);
-        if (!$customer || !password_verify($password, $customer['password_hash'])) {
+        if (!$customer || !verify_password($password, $customer['password_hash'])) {
             return null;
+        }
+        if (password_needs_upgrade($customer['password_hash'])) {
+            $this->pdo->prepare('UPDATE customers SET password_hash = :hash WHERE customer_id = :id')
+                ->execute([':hash' => hash_password($password), ':id' => $customer['customer_id']]);
         }
         unset($customer['password_hash']);
         return $customer;
@@ -66,7 +70,7 @@ class Customer
                 ':email'   => $email,
                 ':phone'   => $data['phone'],
                 ':address' => $data['address'] ?: null,
-                ':hash'    => password_hash($data['password'], PASSWORD_DEFAULT),
+                ':hash'    => hash_password($data['password']),
             ]);
             $customerId = (int) Database::lastId($this->pdo, 'customers', 'customer_id');
 
